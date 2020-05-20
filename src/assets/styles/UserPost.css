@@ -1,0 +1,22 @@
+.container{
+    background-color: black;
+    color: white;
+}
+
+.container1 {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .card2 {
+    width: 300px;
+    border-radius: 15px;
+    border: 1px #363433 solid;
+    margin: 5px;
+  }
+
+  .comment {
+    border-bottom: 1px #363433 solid;
+  }
+  
