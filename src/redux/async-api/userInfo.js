@@ -12,7 +12,7 @@ import {
   export const fetchUserInfo = (userId) => {
       return (dispatch) => {
           dispatch(fetchUserInfoRequest(userId))
-          axios(`${baseUrl}/users/${userId}`)
+          return axios(`${baseUrl}/users/${userId}`)
           .then(response => {
               dispatch(fetchUserInfoSuccess(response.data))
           })

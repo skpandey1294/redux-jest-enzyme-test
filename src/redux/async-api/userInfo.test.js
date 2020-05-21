@@ -1,39 +1,40 @@
 import configureMockStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
-import * as types from '../action-constant'
-import fetchMock from 'fetch-mock'
-import { baseUrl } from '../../config'
+import moxios from 'moxios'
+import expect from 'expect'
+import * as actions from '../actions/userInfo'
 import { fetchUserInfo } from './userInfo'
-import { getAction } from '../../utils'
 
 const middlewares = [thunk]
 const mockStore = configureMockStore(middlewares)
 
-describe('async api call', () => {
-  afterEach(() => {
-    fetchMock.restore()
+describe('getUsersInfo actions', () => {
+
+  beforeEach(function () {
+    moxios.install()
   })
 
-     const resp = fetchMock.getOnce(`${baseUrl}/users/1`, {
-        headers: { 'content-type': 'application/json' }
+  afterEach(function () {
+    moxios.uninstall()
+  })
+
+  it('creates FETCH_USERS_INFO_SUCCESS after successfuly fetching posts', () => {
+
+    const userInfo = [{ key1: 'usersInfo1' }, { key2: 'usersInfo2' }]
+    moxios.wait(() => {
+      const request = moxios.requests.mostRecent()
+      request.respondWith({
+        status: 200,
+        response: userInfo,
       })
+    })
 
+    const expectedActions = [ actions.fetchUserInfoRequest() , actions.fetchUserInfoSuccess(userInfo)]
 
-    const store = mockStore();
-    store.dispatch(fetchUserInfo(1));
+    const store = mockStore()
 
-      
-
-  it("creates FETCH_USERS_INFO_REQUEST when fetching post has been done", async () => {
-    expect(await getAction(store, "FETCH_USERS_INFO_REQUEST")).toEqual({type: types.FETCH_USERS_INFO_REQUEST});
-  });
-
-//   it("creates FETCH_USERS_INFO_SUCCESS when fetching post has been done", async () => {
-//     expect(await getAction(store, "FETCH_USERS_INFO_SUCCESS")).toEqual({type: types.FETCH_USERS_INFO_SUCCESS, payload: []});
-//   });
-
-//   it("creates FETCH_USERS_INFO_FAILURE when fetching post has been done", async () => {
-//     expect(await getAction(store, "FETCH_USERS_INFO_FAILURE")).toEqual({type: types.FETCH_USERS_INFO_FAILURE, payload: 'error'});
-//   });
-});
-
+    return store.dispatch(fetchUserInfo()).then(() => {
+      expect(store.getActions()).toEqual(expectedActions)
+    })
+  })
+})

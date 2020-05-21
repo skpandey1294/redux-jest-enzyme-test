@@ -11,7 +11,7 @@ import { baseUrl } from '../../config'
 export const fetchPosts = () => {
     return (dispatch) => {
         dispatch(fetchPostsRequest())
-        axios(`${baseUrl}/posts`)
+        return axios(`${baseUrl}/posts`)
         .then(response => {
             dispatch(fetchPostsSuccess(response.data))
         })

@@ -1,36 +1,43 @@
 import configureMockStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
-import * as types from '../action-constant'
-import fetchMock from 'fetch-mock'
-import { baseUrl } from '../../config'
-import { fetchPosts } from './posts.js'
-import { getAction } from '../../utils'
+import moxios from 'moxios'
+import expect from 'expect'
+import * as actions from '../actions/posts'
+import { fetchPosts } from '../async-api/posts'
 
 const middlewares = [thunk]
 const mockStore = configureMockStore(middlewares)
 
-describe('async api call', () => {
-  afterEach(() => {
-    fetchMock.restore()
+describe('getPosts actions', () => {
+
+  beforeEach(function () {
+    moxios.install()
   })
 
-     fetchMock.getOnce(`${baseUrl}/posts`, {
-        headers: { 'content-type': 'application/json' }
+  afterEach(function () {
+    moxios.uninstall()
+  })
+
+  it('creates FETCH_POSTS_SUCCESS after successfuly fetching posts', () => {
+
+    const posts = [{ key1: 'value1' }, { key2: 'value2' }]
+    moxios.wait(() => {
+      const request = moxios.requests.mostRecent()
+      request.respondWith({
+        status: 200,
+        response: posts,
       })
+    })
 
-      const store = mockStore();
-      store.dispatch(fetchPosts());
+    const expectedActions = [ actions.fetchPostsRequest() , actions.fetchPostsSuccess(posts)]
 
-  it("creates FETCH_POSTS_REQUEST when fetching post has been done", async () => {
-    expect(await getAction(store, "FETCH_POSTS_REQUEST")).toEqual({type: types.FETCH_POSTS_REQUEST});
-  });
+    const store = mockStore()
 
-  // it("creates FETCH_POSTS_SUCCESS when fetching post has been done", async () => {
-  //     expect(await getAction(store, "FETCH_POSTS_SUCCESS")).toEqual({type: types.FETCH_POSTS_SUCCESS, payload: []});
-  //   });
+    return store.dispatch(fetchPosts()).then(() => {
+      expect(store.getActions()).toEqual(expectedActions)
+    })
+  })
+})
 
-  // it("creates FETCH_POSTS_FAILURE when fetching post has been done", async () => {
-  //     expect(await getAction(store, "FETCH_POSTS_FAILURE")).toEqual({type: types.FETCH_POSTS_FAILURE});
-  //   });
-});
+
 

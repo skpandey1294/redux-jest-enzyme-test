@@ -1,42 +1,40 @@
 import configureMockStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
-import * as types from '../action-constant'
-import fetchMock from 'fetch-mock'
-import { baseUrl } from '../../config'
+import moxios from 'moxios'
+import expect from 'expect'
+import * as actions from '../actions/users'
 import { fetchUsers } from './users'
-import { getAction } from '../../utils'
 
 const middlewares = [thunk]
 const mockStore = configureMockStore(middlewares)
 
-describe('async api call', () => {
-  afterEach(() => {
-    fetchMock.restore()
+describe('getUsers actions', () => {
+
+  beforeEach(function () {
+    moxios.install()
   })
 
-      fetchMock.getOnce(`${baseUrl}/users`, {
-        headers: { 'content-type': 'application/json' }
+  afterEach(function () {
+    moxios.uninstall()
+  })
+
+  it('creates FETCH_USERS_SUCCESS after successfuly fetching posts', () => {
+
+    const users = [{ key1: 'user1' }, { key2: 'user2' }]
+    moxios.wait(() => {
+      const request = moxios.requests.mostRecent()
+      request.respondWith({
+        status: 200,
+        response: users,
       })
+    })
 
+    const expectedActions = [ actions.fetchUsersRequest() , actions.fetchUsersSuccess(users)]
 
+    const store = mockStore()
 
-    const store = mockStore();
-    store.dispatch(fetchUsers());
-      
-
-//   it("creates FETCH_USERS_REQUEST when fetching post has been done", async () => {
-//     expect(await getAction(store, "FETCH_USERS_REQUEST")).toEqual({type: types.FETCH_USERS_REQUEST});
-//   });
-
-//   it("creates FETCH_USERS_SUCCESS when fetching post has been done", async () => {
-//     expect(await getAction(store, "FETCH_USERS_SUCCESS")).toEqual({type: types.FETCH_USERS_SUCCESS, payload: []});
-//   });
-
-//   it("creates FETCH_USERS_FAILURE when fetching post has been done", async () => {
-//     expect(await getAction(store, "FETCH_USERS_FAILURE")).toEqual({type: types.FETCH_USERS_FAILURE, payload: 'error'});
-//   });
-
-  it("creates FETCH_USERS_FAILURE when fetching post has been done", async () => {
-     });
-});
-
+    return store.dispatch(fetchUsers()).then(() => {
+      expect(store.getActions()).toEqual(expectedActions)
+    })
+  })
+})

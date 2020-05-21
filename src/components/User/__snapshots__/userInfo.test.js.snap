@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Posts Component Posts should render without throwing an error 1`] = `
+exports[`UserInfo Component UserInfo should render without throwing an error 1`] = `
 "<ContextProvider value={{...}}>
   <Component />
 </ContextProvider>"

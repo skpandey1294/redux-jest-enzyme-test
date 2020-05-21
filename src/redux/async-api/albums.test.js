@@ -1,36 +1,40 @@
 import configureMockStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
-import * as types from '../action-constant'
-import fetchMock from 'fetch-mock'
-import { baseUrl } from '../../config'
+import moxios from 'moxios'
+import expect from 'expect'
+import * as actions from '../actions/albums'
 import { fetchAlbums } from './albums'
-import { getAction } from '../../utils'
 
 const middlewares = [thunk]
 const mockStore = configureMockStore(middlewares)
 
-describe('async api call', () => {
-  afterEach(() => {
-    fetchMock.restore()
+describe('getAlbums actions', () => {
+
+  beforeEach(function () {
+    moxios.install()
   })
 
-     const resp = fetchMock.getOnce(`${baseUrl}/albums`, {
-        headers: { 'content-type': 'application/json' }
+  afterEach(function () {
+    moxios.uninstall()
+  })
+
+  it('creates FETCH_ALBUMS_SUCCESS after successfuly fetching posts', () => {
+
+    const albums = [{ key1: 'sample1' }, { key2: 'sample2' }]
+    moxios.wait(() => {
+      const request = moxios.requests.mostRecent()
+      request.respondWith({
+        status: 200,
+        response: albums,
       })
+    })
 
-      const store = mockStore();
-      store.dispatch(fetchAlbums());
-      
+    const expectedActions = [ actions.fetchAlbumsRequest() , actions.fetchAlbumsSuccess(albums)]
 
-  it("creates FETCH_ALBUMS_REQUEST when fetching post has been done", async () => {
-    expect(await getAction(store, "FETCH_ALBUMS_REQUEST")).toEqual({type: types.FETCH_ALBUMS_REQUEST});
-  });
+    const store = mockStore()
 
-//   it("creates FETCH_ALBUMS_SUCCESS when fetching post has been done", async () => {
-//     expect(await getAction(store, "FETCH_ALBUMS_SUCCESS")).toEqual({type: types.FETCH_ALBUMS_SUCCESS, payload: []});
-//   });
-
-//   it("creates FETCH_ALBUMS_FAILURE when fetching post has been done", async () => {
-//     expect(await getAction(store, "FETCH_ALBUMS_FAILURE")).toEqual({type: types.FETCH_ALBUMS_FAILURE, payload: 'error'});
-//   });
-});
+    return store.dispatch(fetchAlbums()).then(() => {
+      expect(store.getActions()).toEqual(expectedActions)
+    })
+  })
+})

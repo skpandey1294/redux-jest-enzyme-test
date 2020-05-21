@@ -40,5 +40,7 @@ describe('Testing the Navbar Component', () => {
 
         // console.log(element.debug())
         expect(element.length).toEqual(1)
+
+        expect(wrapper).toMatchSnapshot()
     })
 })

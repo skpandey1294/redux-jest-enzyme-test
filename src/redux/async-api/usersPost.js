@@ -15,7 +15,7 @@ import {
   export const fetchUserPost = (postId) => {
       return (dispatch) => {
           dispatch(fetchUsersPostRequest())
-          axios(`${baseUrl}/posts/${postId}`)
+          return axios(`${baseUrl}/posts/${postId}`)
           .then(response => {
               dispatch(fetchUsersPostSuccess(response.data))
           })
@@ -28,7 +28,7 @@ import {
   export const fetchUserComment = (postId) => {
     return (dispatch) => {
         dispatch(fetchUsersCommentRequest())
-        axios(`${baseUrl}/posts/${postId}/comments`)
+        return axios(`${baseUrl}/posts/${postId}/comments`)
         .then(response => {
             dispatch(fetchUsersCommentSuccess(response.data))
         })

@@ -2,21 +2,22 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { Provider } from "react-redux";
 import configureMockStore from "redux-mock-store";
-import Posts from './posts';
+import Albums from './albums';
 
 const mockStore = configureMockStore();
 const store = mockStore({});
 
 let wrapped = shallow(
     <Provider store={store}>
-        <Posts />
+        <Albums />
     </Provider>
 )
 
 
-describe("Posts Component", () => {
+describe("Albums Component", () => {
 
-    it("Posts should render without throwing an error", () => {
+    it("Albums should render without throwing an error", () => {
         expect(wrapped.debug()).toMatchSnapshot();
     });
+    
 });

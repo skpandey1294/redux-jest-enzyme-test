@@ -1,37 +1,40 @@
 import configureMockStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
-import * as types from '../action-constant'
-import fetchMock from 'fetch-mock'
-import { baseUrl } from '../../config'
+import moxios from 'moxios'
+import expect from 'expect'
+import * as actions from '../actions/albumPhotos'
 import { fetchAlbumPhotos } from './albumPhotos'
-import { getAction } from '../../utils'
 
 const middlewares = [thunk]
 const mockStore = configureMockStore(middlewares)
 
-describe('async api call', () => {
-  afterEach(() => {
-    fetchMock.restore()
+describe('getAlbumPictures actions', () => {
+
+  beforeEach(function () {
+    moxios.install()
   })
 
-      fetchMock.getOnce(`${baseUrl}/photos?albumId=1`, {
-        headers: { 'content-type': 'application/json' }
+  afterEach(function () {
+    moxios.uninstall()
+  })
+
+  it('creates FETCH_ALBUM_PICTURES_SUCCESS after successfuly fetching posts', () => {
+
+    const pictures = [{ key1: 'samplePic1' }, { key2: 'samplePic2' }]
+    moxios.wait(() => {
+      const request = moxios.requests.mostRecent()
+      request.respondWith({
+        status: 200,
+        response: pictures,
       })
-    const store = mockStore();
-    store.dispatch(fetchAlbumPhotos(1));
+    })
 
-      
+    const expectedActions = [ actions.fetchAlbumPhotosRequest() , actions.fetchAlbumPhotosSuccess(pictures)]
 
-  it("creates FETCH_ALBUM_POSTS_REQUEST when fetching post has been done", async () => {
-    expect(await getAction(store, "FETCH_ALBUM_PHOTOS_REQUEST")).toEqual({type: types.FETCH_ALBUM_PHOTOS_REQUEST});
-  });
+    const store = mockStore()
 
-//   it("creates FETCH_ALBUM_POSTS_SUCCESS when fetching post has been done", async () => {
-//     expect(await getAction(store, "FETCH_ALBUM_PHOTOS_SUCCESS")).toEqual({type: types.FETCH_ALBUM_PHOTOS_SUCCESS, payload: []});
-//   });
-
-//   it("creates FETCH_ALBUM_POSTS_FAILURE when fetching post has been done", async () => {
-//     expect(await getAction(store, "FETCH_ALBUM_PHOTOS_FAILURE")).toEqual({type: types.FETCH_ALBUM_PHOTOS_FAILURE, payload: 'error'});
-//   });
-});
-
+    return store.dispatch(fetchAlbumPhotos()).then(() => {
+      expect(store.getActions()).toEqual(expectedActions)
+    })
+  })
+})

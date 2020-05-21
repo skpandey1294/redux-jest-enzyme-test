@@ -1,43 +1,40 @@
 import configureMockStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
-import * as types from '../action-constant'
-import fetchMock from 'fetch-mock'
-import { baseUrl } from '../../config'
+import moxios from 'moxios'
+import expect from 'expect'
+import * as actions from '../actions/userPost'
 import { fetchUserPost } from './usersPost'
-import { getAction } from '../../utils'
-import axios from 'axios'
 
 const middlewares = [thunk]
 const mockStore = configureMockStore(middlewares)
 
-describe('async api call', () => {
-  afterEach(() => {
-    fetchMock.restore()
+describe('getUsersPost actions', () => {
+
+  beforeEach(function () {
+    moxios.install()
   })
 
-     const resp = fetchMock.getOnce(`${baseUrl}/posts/1`, {
-        headers: { 'content-type': 'application/json' }
+  afterEach(function () {
+    moxios.uninstall()
+  })
+
+  it('creates FETCH_USERS_POST_SUCCESS after successfuly fetching posts', () => {
+
+    const post = [{ key1: 'post1' }, { key2: 'post2' }]
+    moxios.wait(() => {
+      const request = moxios.requests.mostRecent()
+      request.respondWith({
+        status: 200,
+        response: post,
       })
+    })
 
-    const store = mockStore();
-    store.dispatch(fetchUserPost(1));
-      
+    const expectedActions = [ actions.fetchUsersPostRequest() , actions.fetchUsersPostSuccess(post)]
 
-//   it("creates FETCH_USERS_POST_REQUEST when fetching post has been done", async () => {
-//     expect(await getAction(store, "FETCH_USERS_POST_REQUEST")).toEqual({type: types.FETCH_USERS_POST_REQUEST});
-//   });
+    const store = mockStore()
 
-//   it("creates FETCH_USERS_POST_SUCCESS when fetching post has been done", async () => {
-//     expect(await getAction(store, "FETCH_USERS_POST_SUCCESS")).toEqual({type: types.FETCH_USERS_POST_SUCCESS, payload: []});
-//   });
-
-//   it("creates FETCH_USERS_POST_FAILURE when fetching post has been done", async () => {
-//     expect(await getAction(store, "FETCH_USERS_POST_FAILURE")).toEqual({type: types.FETCH_USERS_POST_FAILURE, payload: 'error'});
-//   });
-
-  it("creates FETCH_USERS_POST_FAILURE when fetching post has been done", async () => {
-
-  });
-
-
-});
+    return store.dispatch(fetchUserPost()).then(() => {
+      expect(store.getActions()).toEqual(expectedActions)
+    })
+  })
+})

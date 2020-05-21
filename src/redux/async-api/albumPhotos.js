@@ -12,7 +12,7 @@ import {
   export const fetchAlbumPhotos = (albumId) => {
       return (dispatch) => {
           dispatch(fetchAlbumPhotosRequest())
-          axios(`${baseUrl}/photos?albumId=${albumId}`)
+          return axios(`${baseUrl}/photos?albumId=${albumId}`)
           .then(response => {
               dispatch(fetchAlbumPhotosSuccess(response.data))
           })
